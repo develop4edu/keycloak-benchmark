@@ -1146,31 +1146,35 @@ public class DatasetResourceProvider implements RealmResourceProvider {
             user.credentialManager().updateCredential(UserCredentialModel.password(password, false));
 
             // Detect which roles we assign to the user
-            int roleIndexStartForCurrentUser = (i * config.getRealmRolesPerUser());
-            for (int j = roleIndexStartForCurrentUser ; j < roleIndexStartForCurrentUser + config.getRealmRolesPerUser() ; j++) {
-                int roleIndex = j % context.getRealmRoles().size();
-                user.grantRole(context.getRealmRoles().get(roleIndex));
+            if (config.getD4eRealmRoles().isEmpty()) {
+                int roleIndexStartForCurrentUser = (i * config.getRealmRolesPerUser());
+                for (int j = roleIndexStartForCurrentUser; j < roleIndexStartForCurrentUser + config.getRealmRolesPerUser(); j++) {
+                    int roleIndex = j % context.getRealmRoles().size();
+                    user.grantRole(context.getRealmRoles().get(roleIndex));
 
-                logger.tracef("Assigned role %s to the user %s", context.getRealmRoles().get(roleIndex).getName(), user.getUsername());
-            }
+                    logger.tracef("Assigned role %s to the user %s", context.getRealmRoles().get(roleIndex).getName(), user.getUsername());
+                }
 
-            int clientRolesTotal = context.getClientRoles().size();
-            int clientRoleIndexStartForCurrentUser = (i * config.getClientRolesPerUser());
-            for (int j = clientRoleIndexStartForCurrentUser ; j < clientRoleIndexStartForCurrentUser + config.getClientRolesPerUser() ; j++) {
-                int roleIndex = j % clientRolesTotal;
-                user.grantRole(context.getClientRoles().get(roleIndex));
+                int clientRolesTotal = context.getClientRoles().size();
+                int clientRoleIndexStartForCurrentUser = (i * config.getClientRolesPerUser());
+                for (int j = clientRoleIndexStartForCurrentUser; j < clientRoleIndexStartForCurrentUser + config.getClientRolesPerUser(); j++) {
+                    int roleIndex = j % clientRolesTotal;
+                    user.grantRole(context.getClientRoles().get(roleIndex));
 
-                logger.tracef("Assigned role %s to the user %s", context.getClientRoles().get(roleIndex).getName(), user.getUsername());
-            }
+                    logger.tracef("Assigned role %s to the user %s", context.getClientRoles().get(roleIndex).getName(), user.getUsername());
+                }
 
-            // Detect which groups we assign to the user
-            int groupIndexStartForCurrentUser = (i * config.getGroupsPerUser());
-            for (int j = groupIndexStartForCurrentUser ; j < groupIndexStartForCurrentUser + config.getGroupsPerUser() ; j++) {
-                int groupIndex = j % context.getGroups().size();
-                GroupModel group = context.getGroups().get(groupIndex);
-                user.joinGroup(session.groups().getGroupById(realm, group.getId()));
+                // Detect which groups we assign to the user
+                int groupIndexStartForCurrentUser = (i * config.getGroupsPerUser());
+                for (int j = groupIndexStartForCurrentUser ; j < groupIndexStartForCurrentUser + config.getGroupsPerUser() ; j++) {
+                    int groupIndex = j % context.getGroups().size();
+                    GroupModel group = context.getGroups().get(groupIndex);
+                    user.joinGroup(session.groups().getGroupById(realm, group.getId()));
 
-                logger.tracef("Assigned group %s to the user %s", context.getGroups().get(groupIndex).getName(), user.getUsername());
+                    logger.tracef("Assigned group %s to the user %s", context.getGroups().get(groupIndex).getName(), user.getUsername());
+                }
+            } else {
+                context.getRealmRoles().forEach(user::grantRole);
             }
 
             context.incUserCount();
@@ -1186,14 +1190,26 @@ public class DatasetResourceProvider implements RealmResourceProvider {
             RealmModel realm = session.realms().getRealm(context.getRealm().getId());
             context.setRealm(realm);
 
-            List<RoleModel> sortedRoles = realm.getRolesStream()
-                    .filter(roleModel -> roleModel.getName().startsWith(config.getRealmRolePrefix()))
-                    .sorted((role1, role2) -> {
-                        String name1 = role1.getName().substring(config.getRealmRolePrefix().length());
-                        String name2 = role2.getName().substring(config.getRealmRolePrefix().length());
-                        return Integer.parseInt(name1) - Integer.parseInt(name2);
-                    })
-                    .collect(Collectors.toList());
+            List<RoleModel> sortedRoles;
+            if (config.getD4eRealmRoles().isEmpty()) {
+                sortedRoles = realm.getRolesStream()
+                        .filter(roleModel -> roleModel.getName().startsWith(config.getRealmRolePrefix()))
+                        .sorted((role1, role2) -> {
+                            String name1 = role1.getName().substring(config.getRealmRolePrefix().length());
+                            String name2 = role2.getName().substring(config.getRealmRolePrefix().length());
+                            return Integer.parseInt(name1) - Integer.parseInt(name2);
+                        })
+                        .collect(Collectors.toList());
+            } else {
+                sortedRoles = realm.getRolesStream()
+                        .filter(roleModel -> config.getD4eRealmRoles().contains(roleModel.getName()))
+                        .sorted((role1, role2) -> {
+                            String name1 = role1.getName().substring(config.getRealmRolePrefix().length());
+                            String name2 = role2.getName().substring(config.getRealmRolePrefix().length());
+                            return name1.compareTo(name2);
+                        })
+                        .collect(Collectors.toList());
+            }
             context.setRealmRoles(sortedRoles);
 
             logger.debugf("CACHE: After obtain realm roles in realm %s", realm.getName());

@@ -18,6 +18,10 @@
 
 package org.keycloak.benchmark.dataset.config;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static org.keycloak.benchmark.dataset.config.DatasetOperation.CREATE_AUTHZ_CLIENT;
 import static org.keycloak.benchmark.dataset.config.DatasetOperation.CREATE_CLIENTS;
 import static org.keycloak.benchmark.dataset.config.DatasetOperation.CREATE_EVENTS;
@@ -75,6 +79,9 @@ public class DatasetConfig {
     // Count of realm roles to be created in every created realm
     @QueryParamIntFill(paramName = "realm-roles-per-realm", defaultValue = 25, operations = { CREATE_REALMS })
     private Integer realmRolesPerRealm;
+
+    @QueryParamFill(paramName="d4e-realm-roles", defaultValue = "", operations = { CREATE_USERS})
+    private String d4eRealmRoles;
 
     // Prefix for newly created clients (in case of CREATE_REALMS and CREATE_CLIENTS). In case of CREATE_USERS it is used to find the clients with clientRoles, which will be assigned to users
     @QueryParamFill(paramName = "client-prefix", defaultValue = "client-", operations = { CREATE_REALMS, CREATE_CLIENTS, CREATE_USERS, CREATE_OFFLINE_SESSIONS, LAST_CLIENT })
@@ -267,6 +274,13 @@ public class DatasetConfig {
 
     public Integer getRealmRolesPerRealm() {
         return realmRolesPerRealm;
+    }
+
+    public List<String> getD4eRealmRoles() {
+        if (d4eRealmRoles == null || d4eRealmRoles.isEmpty()) {
+            return List.of();
+        }
+        return Stream.of(d4eRealmRoles.split(",")).map(String::trim).collect(Collectors.toList());
     }
 
     public String getClientPrefix() {
