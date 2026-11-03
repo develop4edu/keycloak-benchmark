@@ -1141,6 +1141,7 @@ public class DatasetResourceProvider implements RealmResourceProvider {
             user.setFirstName(username + "-first");
             user.setLastName(username + "-last");
             user.setEmail(username + String.format("@%s.com", realm.getName()));
+            user.setEmailVerified(config.getEmailVerified());
 
             String password = String.format("%s-password", username);
             user.credentialManager().updateCredential(UserCredentialModel.password(password, false));

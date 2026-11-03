@@ -13,10 +13,15 @@ parameters:
 - count=1000
 - user-prefix=loadtest- (optional, default: user-)
 - d4e-realm-roles=ekv-benutzer,ekv-kunde,ekv-lehrer (optional, default: empty)
+- d4e-email-verified=true (optional, default: false) - sets the email to verified
 
 [source]
 ----
-curl "local.klett-werkstatt.de:58080/realms/master/dataset/create-users?count=10&realm-name=ekv&user-prefix=loadtest-&d4e-realm-roles=ekv-benutzer,ekv-kunde,ekv-lehrer"
+curl "local.klett-werkstatt.de:58080/realms/master/dataset/create-users?count=10&realm-name=ekv&user-prefix=loadtest-&d4e-realm-roles=ekv-benutzer,ekv-kunde,ekv-lehrer&d4e-email-verified=true"
+
+# check status
+curl "http://local.klett-werkstatt.de:58080/realms/master/dataset/status"
 ----
+
 
 
