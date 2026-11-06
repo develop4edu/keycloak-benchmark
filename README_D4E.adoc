@@ -14,6 +14,7 @@ parameters:
 - user-prefix=loadtest- (optional, default: user-)
 - d4e-realm-roles=ekv-benutzer,ekv-kunde,ekv-lehrer (optional, default: empty)
 - d4e-email-verified=true (optional, default: false) - sets the email to verified
+- d4e-required-actions-remove=true (optional, default: false) removes all automatically created required actions
 
 [source]
 ----

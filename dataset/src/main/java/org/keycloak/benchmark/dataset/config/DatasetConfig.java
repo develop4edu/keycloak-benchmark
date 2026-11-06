@@ -86,6 +86,9 @@ public class DatasetConfig {
     @QueryParamFill(paramName = "d4e-email-verified", defaultValue = "false", operations = { CREATE_USERS })
     private String d4eEmailVerified;
 
+    @QueryParamFill(paramName = "d4e-required-actions-remove", defaultValue = "", operations = { CREATE_USERS })
+    private String d4eRequiredActionsRemove;
+
     // Prefix for newly created clients (in case of CREATE_REALMS and CREATE_CLIENTS). In case of CREATE_USERS it is used to find the clients with clientRoles, which will be assigned to users
     @QueryParamFill(paramName = "client-prefix", defaultValue = "client-", operations = { CREATE_REALMS, CREATE_CLIENTS, CREATE_USERS, CREATE_OFFLINE_SESSIONS, LAST_CLIENT })
     private String clientPrefix;
@@ -286,8 +289,12 @@ public class DatasetConfig {
         return Stream.of(d4eRealmRoles.split(",")).map(String::trim).collect(Collectors.toList());
     }
 
-    public Boolean getEmailVerified() {
+    public Boolean getD4eEmailVerified() {
         return Boolean.valueOf(d4eEmailVerified);
+    }
+
+    public Boolean getD4eRequiredActionsRemove() {
+        return Boolean.valueOf(d4eRequiredActionsRemove);
     }
 
     public String getClientPrefix() {

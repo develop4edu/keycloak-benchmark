@@ -1141,10 +1141,14 @@ public class DatasetResourceProvider implements RealmResourceProvider {
             user.setFirstName(username + "-first");
             user.setLastName(username + "-last");
             user.setEmail(username + String.format("@%s.com", realm.getName()));
-            user.setEmailVerified(config.getEmailVerified());
+            user.setEmailVerified(config.getD4eEmailVerified());
 
             String password = String.format("%s-password", username);
             user.credentialManager().updateCredential(UserCredentialModel.password(password, false));
+
+            if (config.getD4eRequiredActionsRemove()) {
+                user.getRequiredActionsStream().forEach(user::removeRequiredAction);
+            }
 
             // Detect which roles we assign to the user
             if (config.getD4eRealmRoles().isEmpty()) {
